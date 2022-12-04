@@ -53,9 +53,9 @@ def saveResult(img_file, img, boxes, dirname='./result/', verticals=None, texts=
             os.mkdir(dirname)
 
         with open(res_file, 'w') as f:
-            for i, box in enumerate(boxes):
+            for i, (box, text) in enumerate(zip(boxes, texts)):# 変更
                 poly = np.array(box).astype(np.int32).reshape((-1))
-                strResult = ','.join([str(p) for p in poly]) + '\r\n'
+                strResult = ','.join([str(p) for p in poly]) +','+ str(text) +'\r\n'
                 f.write(strResult)
 
                 poly = poly.reshape(-1, 2)
@@ -67,9 +67,10 @@ def saveResult(img_file, img, boxes, dirname='./result/', verticals=None, texts=
 
                 if texts is not None:
                     font = cv2.FONT_HERSHEY_SIMPLEX
-                    font_scale = 0.5
-                    cv2.putText(img, "{}".format(texts[i]), (poly[0][0]+1, poly[0][1]+1), font, font_scale, (0, 0, 0), thickness=1)
-                    cv2.putText(img, "{}".format(texts[i]), tuple(poly[0]), font, font_scale, (0, 255, 255), thickness=1)
+                    #font_scale = 0.5
+                    font_scale = 0.3
+                    #cv2.putText(img, "{:.3f}".format(texts[i]), (poly[0][0]+1, poly[0][1]+1), font, font_scale, (0, 0, 0), thickness=1)
+                    cv2.putText(img, "{:.3f}".format(texts[i]), tuple(poly[0]), font, font_scale, (255, 0, 0), thickness=1)
 
         # Save result image
         cv2.imwrite(res_img_file, img)

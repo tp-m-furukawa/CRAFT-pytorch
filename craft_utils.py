@@ -31,6 +31,7 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
 
     det = []
     mapper = []
+    text_score_list = []# 追加
     for k in range(1,nLabels):
         # size filtering
         size = stats[k, cv2.CC_STAT_AREA]
@@ -38,6 +39,7 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
 
         # thresholding
         if np.max(textmap[labels==k]) < text_threshold: continue
+        text_score_list.append(np.max(textmap[labels==k]))# 追加
 
         # make segmentation map
         segmap = np.zeros(textmap.shape, dtype=np.uint8)
@@ -76,7 +78,7 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
         det.append(box)
         mapper.append(k)
 
-    return det, labels, mapper
+    return det, labels, mapper, text_score_list # text_score_list追加
 
 def getPoly_core(boxes, labels, mapper, linkmap):
     # configs
@@ -225,14 +227,14 @@ def getPoly_core(boxes, labels, mapper, linkmap):
     return polys
 
 def getDetBoxes(textmap, linkmap, text_threshold, link_threshold, low_text, poly=False):
-    boxes, labels, mapper = getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
+    boxes, labels, mapper, text_score_list = getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
 
     if poly:
         polys = getPoly_core(boxes, labels, mapper, linkmap)
     else:
         polys = [None] * len(boxes)
 
-    return boxes, polys
+    return boxes, polys, text_score_list
 
 def adjustResultCoordinates(polys, ratio_w, ratio_h, ratio_net = 2):
     if len(polys) > 0:

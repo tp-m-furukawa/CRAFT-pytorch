@@ -4,3 +4,6 @@
 *.pth
 result*
 weights*
+images/
+model/
+src/

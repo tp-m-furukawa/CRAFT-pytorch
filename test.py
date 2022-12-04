@@ -98,7 +98,7 @@ def test_net(net, image, text_threshold, link_threshold, low_text, cuda, poly, r
     t1 = time.time()
 
     # Post-processing
-    boxes, polys = craft_utils.getDetBoxes(score_text, score_link, text_threshold, link_threshold, low_text, poly)
+    boxes, polys, text_score_list = craft_utils.getDetBoxes(score_text, score_link, text_threshold, link_threshold, low_text, poly)
 
     # coordinate adjustment
     boxes = craft_utils.adjustResultCoordinates(boxes, ratio_w, ratio_h)
@@ -115,7 +115,7 @@ def test_net(net, image, text_threshold, link_threshold, low_text, cuda, poly, r
 
     if args.show_time : print("\ninfer/postproc time : {:.3f}/{:.3f}".format(t0, t1))
 
-    return boxes, polys, ret_score_text
+    return boxes, polys, ret_score_text, text_score_list
 
 
 
@@ -159,13 +159,13 @@ if __name__ == '__main__':
         print("Test image {:d}/{:d}: {:s}".format(k+1, len(image_list), image_path), end='\r')
         image = imgproc.loadImage(image_path)
 
-        bboxes, polys, score_text = test_net(net, image, args.text_threshold, args.link_threshold, args.low_text, args.cuda, args.poly, refine_net)
+        bboxes, polys, score_text, text_score_list = test_net(net, image, args.text_threshold, args.link_threshold, args.low_text, args.cuda, args.poly, refine_net)
 
         # save score text
         filename, file_ext = os.path.splitext(os.path.basename(image_path))
         mask_file = result_folder + "/res_" + filename + '_mask.jpg'
         cv2.imwrite(mask_file, score_text)
 
-        file_utils.saveResult(image_path, image[:,:,::-1], polys, dirname=result_folder)
+        file_utils.saveResult(image_path, image[:,:,::-1], polys, dirname=result_folder, texts = text_score_list)
 
     print("elapsed time : {}s".format(time.time() - t))
